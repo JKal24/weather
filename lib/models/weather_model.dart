@@ -1,12 +1,15 @@
 class WeatherModel {
-  String? dateRecorded, date, country, weather;
+  int id;
+  String? dateRecorded, dateSeen, timeSeen, country, description;
   double? humidity, temperature, tempMin, tempMax, tempFeelsLike;
 
   WeatherModel({
+    required this.id,
     required this.dateRecorded,
-    required this.date,
+    required this.dateSeen,
+    required this.timeSeen,
     required this.country,
-    required this.weather,
+    required this.description,
     required this.humidity,
     required this.temperature,
     required this.tempMin,
@@ -15,16 +18,35 @@ class WeatherModel {
   });
 
   Map<String, dynamic> toMap() {
-    return {
+    final map = {
+      'id': id,
       'daterecorded': dateRecorded,
-      'date': date,
+      'dateseen': dateSeen,
+      'timeseen': timeSeen,
       'country': country,
-      'weather': weather,
+      'description': description,
       'humidity': humidity,
       'temperature': temperature,
       'tempmin': tempMin,
       'tempmax': tempMax,
       'tempfeelslike': tempFeelsLike
     };
+    return map;
+  }
+
+  List<Object?> toList() {
+    return [
+      id,
+      dateRecorded,
+      dateSeen,
+      timeSeen,
+      country,
+      description,
+      humidity,
+      temperature,
+      tempMin,
+      tempMax,
+      tempFeelsLike
+    ];
   }
 }

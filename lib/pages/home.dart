@@ -1,26 +1,91 @@
+import 'package:fitness/models/weather_model.dart';
+import 'package:fitness/services/weather_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 
-class HomePage extends StatelessWidget {
+class HomeUI extends StatelessWidget {
+  const HomeUI({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      backgroundColor: Color(0xff303644),
+      body: HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+  @override
+  HomePageState createState() => HomePageState();
+}
+
+class HomePageState extends State<HomePage> {
+  String dateToday = DateFormat('MMMM d, y').format(DateTime.now());
+  List<WeatherModel> weatherList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _getInitialInfo();
+  }
+
+  Future<void> _getInitialInfo() async {
+    List<WeatherModel> serviceList = (await WeatherService().getNext5DaysWeather() ?? []);
+    setState(() {
+      weatherList = serviceList;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: appBar(),
       backgroundColor: Colors.white,
-      body: Column (children: [
-        Container(
-          height: 150,
-          color: Colors.green,
-          margin: const EdgeInsets.only(top: 15),
-          // child: ListView.builder(
-            // itemBuilder: (context, index) {
-            //   return Container();
-            // }
-          // ),
-        )
-      ],
+      body: Column (
+        children: [
+          Container(
+            height: 150,
+            color: Colors.blue,
+            margin: const EdgeInsets.only(top: 15),
+            alignment: Alignment.center,
+            child: Column(
+              children: [
+                Text(
+                  dateToday,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                    fontSize: 16
+                  ),
+                ),
+                Text(
+                  (weatherList.isNotEmpty) ? weatherList[0].temperature.toString() : '',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    color: Colors.black,
+                    fontSize: 16
+                  ),
+                ),
+                Text(
+                  (weatherList.isNotEmpty) ? "${weatherList[0].tempMin}/${weatherList[0].tempMax} Feels like ${weatherList[0].tempFeelsLike}" : '',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                    fontSize: 16
+                  ),
+                ),
+              ]
+            ),
+            // child: ListView.builder(
+              // itemBuilder: (context, index) {
+              //   return Container();
+              // }
+            // ),
+          )
+        ]
       )
     );
   }
@@ -29,7 +94,7 @@ class HomePage extends StatelessWidget {
 AppBar appBar() {
   return AppBar(
     title: const Text(
-      "Weather",
+      "Toronto",
         style: TextStyle(
           color: Colors.black,
           fontSize: 18,
