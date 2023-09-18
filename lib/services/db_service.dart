@@ -54,8 +54,6 @@ class DbService {
     DateFormat formatter = DateFormat('yyyy-MM-dd');
     String dateRecorded = formatter.format(dateTime);
 
-    final List<Map<String, dynamic>>? maps0 = await database?.query('weathers');
-
     final List<Map<String, dynamic>>? maps = await database?.query('weathers', where: 'daterecorded = ?', whereArgs: [dateRecorded]);
     List<WeatherModel> weathers = [];
 

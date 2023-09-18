@@ -57,7 +57,7 @@ class WeatherService {
         timeSeen: timeFormatter.format(weather?.date ?? DateTime.now()),
         country: weather?.country,
         description: weather?.weatherDescription,
-        temperature: weather?.temperature?.celsius,
+        temperature: double.parse(weather?.temperature?.celsius?.toStringAsFixed(1) ?? "0.0"),
         humidity: weather?.humidity,
         tempMin: double.parse(weather?.tempMin?.celsius?.toStringAsFixed(1) ?? "0.0"),
         tempMax: double.parse(weather?.tempMax?.celsius?.toStringAsFixed(1) ?? "0.0"),

@@ -25,6 +25,7 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   String dateToday = DateFormat('MMMM d, y').format(DateTime.now());
   List<WeatherModel> weatherList = [];
+  List<WeatherModel> weatherListPerDay = [];
 
   @override
   void initState() {
@@ -33,9 +34,20 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> _getInitialInfo() async {
-    List<WeatherModel> serviceList = (await WeatherService().getNext5DaysWeather() ?? []);
+    List<WeatherModel> newWeatherList = (await WeatherService().getNext5DaysWeather() ?? []);
+    List<WeatherModel> newWeatherListPerDay = [];
+
+    String? dateseen = "";
+    for (WeatherModel model in newWeatherList) {
+      if (model.dateSeen != dateseen) {
+        newWeatherListPerDay.add(model);
+        dateseen = model.dateSeen;
+      }
+    }
+
     setState(() {
-      weatherList = serviceList;
+      weatherList = newWeatherList;
+      weatherListPerDay = newWeatherListPerDay;
     });
   }
 
@@ -43,13 +55,10 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: appBar(),
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.blue,
       body: Column (
         children: [
           Container(
-            height: 150,
-            color: Colors.blue,
-            margin: const EdgeInsets.only(top: 15),
             alignment: Alignment.center,
             child: Column(
               children: [
@@ -57,33 +66,152 @@ class HomePageState extends State<HomePage> {
                   dateToday,
                   style: const TextStyle(
                     fontWeight: FontWeight.w500,
-                    color: Colors.black,
+                    color: Colors.white,
                     fontSize: 16
                   ),
                 ),
                 Text(
-                  (weatherList.isNotEmpty) ? weatherList[0].temperature.toString() : '',
+                  (weatherList.isNotEmpty) ? "${weatherList[0].temperature}℃" : '',
                   style: const TextStyle(
-                    fontWeight: FontWeight.w900,
-                    color: Colors.black,
-                    fontSize: 16
+                    color: Colors.white,
+                    fontSize: 52
                   ),
                 ),
                 Text(
-                  (weatherList.isNotEmpty) ? "${weatherList[0].tempMin}/${weatherList[0].tempMax} Feels like ${weatherList[0].tempFeelsLike}" : '',
+                  (weatherList.isNotEmpty) ? "${weatherList[0].tempMin}℃/${weatherList[0].tempMax}℃ Feels like ${weatherList[0].tempFeelsLike}℃" : '',
                   style: const TextStyle(
                     fontWeight: FontWeight.w500,
-                    color: Colors.black,
+                    color: Colors.white,
                     fontSize: 16
                   ),
                 ),
+                Text(
+                  (weatherList.isNotEmpty) ? "${weatherList[0].description?[0].toUpperCase()}${weatherList[0].description?.substring(1)}" : '',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                    fontSize: 16
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.only(top: 20),
+                  padding: const EdgeInsets.all(5),
+                  alignment: Alignment.center,
+                  color: Colors.lightBlue,
+                  height: 110,
+                  width: 400,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: 5,
+                    itemBuilder: (context, index) {
+                      return weatherList.isNotEmpty ?
+                      (
+                        Column(
+                          children: [
+                            Text(
+                              "${weatherList[index].dateSeen?.split("-")[1]}/${weatherList[index].dateSeen?.split("-")[2]}, ${weatherList[index].timeSeen}",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                                fontSize: 16
+                              ),
+                            ),
+                            Text(
+                              "${weatherList[index].temperature}℃",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                                fontSize: 16
+                              ),
+                            ),
+                            Text(
+                              "${weatherList[index].humidity}%",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                                fontSize: 16
+                              ),
+                            ),
+                            Text(
+                              "${weatherList[index].description}",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                                fontSize: 16
+                              ),
+                            )
+                          ]
+                        )
+                      ) :
+                      (
+                        const SizedBox(height: 0, width: 0)
+                      );
+                    },
+                    separatorBuilder: (context, index) => const SizedBox(
+                      width: 20,
+                    )
+                  )
+                ),
+                Container(
+                  margin: const EdgeInsets.only(top: 40),
+                  padding: const EdgeInsets.all(5),
+                  alignment: Alignment.center,
+                  color: Colors.lightBlue,
+                  height: 150,
+                  width: 400,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: weatherListPerDay.length,
+                    itemBuilder: (context, index) {
+                      return weatherList.isNotEmpty ?
+                      (
+                        Column(
+                          children: [
+                            Text(
+                              "${weatherListPerDay[index].dateSeen?.split("-")[1]}/${weatherListPerDay[index].dateSeen?.split("-")[2]}",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                                fontSize: 16
+                              ),
+                            ),
+                            Text(
+                              (weatherList.isNotEmpty) ? "${weatherList[0].temperature}℃" : '',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 32
+                              ),
+                            ),
+                            Text(
+                              (weatherList.isNotEmpty) ? "${weatherList[0].tempMin}℃/${weatherList[0].tempMax}℃" : '',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                                fontSize: 16
+                              ),
+                            ),
+                            Text(
+                              (weatherList.isNotEmpty) ? "${weatherList[0].description?[0].toUpperCase()}${weatherList[0].description?.substring(1)}" : '',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                                fontSize: 16
+                              ),
+                            )
+                          ]
+                        )
+                      ) :
+                      (
+                        const SizedBox(height: 0, width: 0)
+                      );
+                    },
+                    separatorBuilder: (context, index) => const SizedBox(
+                      width: 20,
+                    )
+                  )
+                )
               ]
             ),
-            // child: ListView.builder(
-              // itemBuilder: (context, index) {
-              //   return Container();
-              // }
-            // ),
           )
         ]
       )
