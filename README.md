@@ -1,6 +1,8 @@
-# fitness
+# Weather
 
-A new Flutter project.
+Simple Weather app.
+
+![Alt text](/assets/sample.png?raw=true "Sample")
 
 ## Getting Started
 
