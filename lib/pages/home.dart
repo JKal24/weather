@@ -37,13 +37,50 @@ class HomePageState extends State<HomePage> {
     List<WeatherModel> newWeatherList = (await WeatherService().getNext5DaysWeather() ?? []);
     List<WeatherModel> newWeatherListPerDay = [];
 
-    String? dateseen = "";
+    Map<String, List<WeatherModel>> weathersPerDay = {};
+
     for (WeatherModel model in newWeatherList) {
-      if (model.dateSeen != dateseen) {
-        newWeatherListPerDay.add(model);
-        dateseen = model.dateSeen;
+      if (!weathersPerDay.containsKey(model.dateSeen)) {
+        weathersPerDay[model.dateSeen ?? ""] = [];
       }
+      weathersPerDay[model.dateSeen]?.add(model);
     }
+
+    weathersPerDay.forEach((key, value) {
+      double count = 0.0;
+      double currentTemp = 0.0;
+      double humidity = 0.0;
+
+      Map<String, int> weatherCounts = {};
+
+      for (WeatherModel model in value) {
+        count++;
+        currentTemp += model.temperature ?? 0.0;
+        humidity += model.humidity ?? 0.0;
+
+        if (!weatherCounts.containsKey(model.description)) weatherCounts[model.description ?? ""] = 0;
+        int prevWeatherCount = weatherCounts[model.description ?? ""] ?? 0;
+        weatherCounts[model.description ?? ""] = prevWeatherCount + 1;
+      }
+
+      if (value.isNotEmpty) {
+        WeatherModel dailyModel = value[0];
+        dailyModel.temperature = double.parse((currentTemp / count).toStringAsFixed(1));
+        dailyModel.humidity = double.parse((humidity / count).toStringAsFixed(1));
+
+        String weather = "";
+        int countWeather = 0;
+        for (String recordedWeather in weatherCounts.keys) {
+          if ((weatherCounts[recordedWeather] ?? 0) > countWeather) {
+            countWeather = weatherCounts[recordedWeather] ?? 0;
+            weather = recordedWeather;
+          }
+        }
+
+        dailyModel.description = weather;
+        newWeatherListPerDay.add(dailyModel);
+      }
+    });
 
     setState(() {
       weatherList = newWeatherList;
@@ -97,9 +134,12 @@ class HomePageState extends State<HomePage> {
                   margin: const EdgeInsets.only(top: 20),
                   padding: const EdgeInsets.all(5),
                   alignment: Alignment.center,
-                  color: Colors.lightBlue,
                   height: 110,
                   width: 400,
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                    color: Colors.lightBlue
+                  ),
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: 5,
@@ -156,9 +196,12 @@ class HomePageState extends State<HomePage> {
                   margin: const EdgeInsets.only(top: 40),
                   padding: const EdgeInsets.all(5),
                   alignment: Alignment.center,
-                  color: Colors.lightBlue,
-                  height: 150,
+                  height: 160,
                   width: 400,
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                    color: Colors.lightBlue
+                  ),
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: weatherListPerDay.length,
@@ -176,14 +219,14 @@ class HomePageState extends State<HomePage> {
                               ),
                             ),
                             Text(
-                              (weatherList.isNotEmpty) ? "${weatherList[0].temperature}℃" : '',
+                              (weatherListPerDay.isNotEmpty) ? "${weatherListPerDay[index].temperature}℃" : '',
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 32
                               ),
                             ),
                             Text(
-                              (weatherList.isNotEmpty) ? "${weatherList[0].tempMin}℃/${weatherList[0].tempMax}℃" : '',
+                              (weatherListPerDay.isNotEmpty) ? "${weatherListPerDay[index].tempMin}℃/${weatherListPerDay[index].tempMax}℃" : '',
                               style: const TextStyle(
                                 fontWeight: FontWeight.w500,
                                 color: Colors.white,
@@ -191,7 +234,15 @@ class HomePageState extends State<HomePage> {
                               ),
                             ),
                             Text(
-                              (weatherList.isNotEmpty) ? "${weatherList[0].description?[0].toUpperCase()}${weatherList[0].description?.substring(1)}" : '',
+                              "${weatherListPerDay[index].humidity}%",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                                fontSize: 16
+                              ),
+                            ),
+                            Text(
+                              (weatherListPerDay.isNotEmpty) ? "${weatherListPerDay[index].description?[0].toUpperCase()}${weatherListPerDay[index].description?.substring(1)}" : '',
                               style: const TextStyle(
                                 fontWeight: FontWeight.w500,
                                 color: Colors.white,
